@@ -106,7 +106,7 @@ export default async function DashboardPage() {
             신청 현황 대시보드
           </h1>
           <p className="mt-3 text-lg font-normal text-neutral-400">
-            AI 바이브 코딩 마스터클래스
+            김종석의 AI 바이브 코딩 마스터 클래스
           </p>
         </section>
 

@@ -7,7 +7,7 @@ export default function Home() {
         {/* headline */}
         <section className="py-16">
           <h1 className="text-2xl font-semibold text-white md:text-4xl">
-            AI 바이브 코딩 마스터클래스
+            김종석의 AI 바이브 코딩 마스터 클래스
           </h1>
           <p className="mt-3 text-lg font-normal text-neutral-400">
             코딩 없이 AI로 업무 도구를 만드는 법
