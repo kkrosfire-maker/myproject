@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface FormData {
   name: string;
@@ -32,6 +33,8 @@ export default function RegistrationForm() {
   const [form, setForm] = useState<FormData>(initialForm);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -41,6 +44,7 @@ export default function RegistrationForm() {
     if (errors[name as keyof FormData]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+    if (submitError) setSubmitError("");
   }
 
   function validate(): boolean {
@@ -59,22 +63,39 @@ export default function RegistrationForm() {
     return Object.keys(next).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
 
-    const submittedEmails: string[] = JSON.parse(
-      localStorage.getItem("vw_submitted_emails") ?? "[]"
-    );
-    if (submittedEmails.includes(form.email.toLowerCase())) {
-      setErrors({ email: "이미 신청된 이메일입니다." });
+    if (!supabase) {
+      setSubmitError("연결 설정이 올바르지 않습니다. 관리자에게 문의해주세요.");
       return;
     }
 
-    submittedEmails.push(form.email.toLowerCase());
-    localStorage.setItem("vw_submitted_emails", JSON.stringify(submittedEmails));
+    setLoading(true);
+    setSubmitError("");
 
-    console.log("[vibe-workshop] 신청 데이터:", form);
+    const { error } = await supabase.from("signups").insert({
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      department: form.team,
+      position: form.rank,
+      ai_experience: form.aiExperience,
+      learning_goal: form.learningGoal,
+      dietary_restrictions: form.dietRestriction.trim() || null,
+    });
+
+    setLoading(false);
+
+    if (error) {
+      if (error.code === "23505") {
+        setErrors({ email: "이미 신청된 이메일입니다." });
+      } else {
+        setSubmitError("저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      }
+      return;
+    }
+
     setSubmitted(true);
   }
 
@@ -221,12 +242,17 @@ export default function RegistrationForm() {
         />
       </Field>
 
+      {submitError && (
+        <p className="text-sm text-orange-400">{submitError}</p>
+      )}
+
       <div className="mt-8">
         <button
           type="submit"
-          className="h-10 w-full rounded-full bg-orange-500 px-6 text-sm font-medium text-white transition-colors hover:bg-orange-400"
+          disabled={loading}
+          className="h-10 w-full rounded-full bg-orange-500 px-6 text-sm font-medium text-white transition-colors hover:bg-orange-400 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          신청하기
+          {loading ? "저장 중..." : "신청하기"}
         </button>
       </div>
     </form>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${GeistMono.variable} bg-neutral-950 text-white antialiased`}>
+      <body className="bg-neutral-950 text-white antialiased">
         {children}
       </body>
     </html>
